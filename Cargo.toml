@@ -1,0 +1,15 @@
+[package]
+name = "monair"
+description="Utility to monitor and report on air quality"
+version = "0.1.0"
+authors = ["Jon Deaves <hello@jondeaves.me>"]
+edition = "2018"
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+
+dotenv = "0.15.0"
+envy = "0.4"
+serde = { version = "1.0", features = ["derive"] }
