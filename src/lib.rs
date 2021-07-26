@@ -1,6 +1,5 @@
 use serde::Deserialize;
 use serde_json::{Result, Value};
-use std::any::Any;
 
 #[derive(Deserialize, Debug)]
 pub struct MonairConfig {
@@ -10,7 +9,7 @@ pub struct MonairConfig {
 }
 
 #[derive(Deserialize, Debug)]
-pub struct AirQualityResponse {
+pub struct AirQuality {
     pub location_name: String,
     pub pm10: f32,
 }
@@ -28,22 +27,24 @@ pub async fn run(config: MonairConfig) -> Result<()> {
         panic!("Could not fetch data: {:?}", err);
     });
 
-    let resp_json = resp.json().await.unwrap_or_else(|err| {
+    let resp_json = resp.text().await.unwrap_or_else(|err| {
         panic!("Could not get JSON from response: {:?}", err);
     });
 
-    let payload: Value = serde_json::from_str(resp_json)?;
+    let payload: Value = serde_json::from_str(resp_json.as_str())?;
 
-    let air_quality_response = AirQualityResponse {
+    let air_quality = AirQuality {
         location_name: payload["data"]["city"]["name"].to_string(),
-        pm10: match payload["data"]["iaqi"]["pm10"].to_string().parse::<f32>() {
+        pm10: match payload["data"]["iaqi"]["pm10"]["v"]
+            .to_string()
+            .parse::<f32>()
+        {
             Ok(value) => value,
             Err(_) => 0.0,
         },
     };
 
-    println!("{:#?}", air_quality_response);
-    println!("{}", air_quality_response.location_name);
+    println!("{:#?}", air_quality);
 
     Ok(())
 }
